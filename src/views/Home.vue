@@ -2,10 +2,13 @@
   <div>
     <v-navigation-drawer mini-variant app>
       <v-list dense>
-        <MenuItem to="/" icon="mdi-account" name="Профиль" />
+        <MenuItem to="/school" icon="mdi-school-outline" name="Обучение" />
+        <MenuItem to="/reviews" icon="mdi-file-outline" name="Рецензии" />
       </v-list>
     </v-navigation-drawer>
-    <v-main></v-main>
+    <v-main>
+      <router-view />
+    </v-main>
   </div>
 </template>
 

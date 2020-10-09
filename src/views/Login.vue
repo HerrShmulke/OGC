@@ -1,5 +1,5 @@
 <template>
-  <v-container class="fill-height" @keyup="login()">
+  <v-container class="fill-height" @keyup.enter="login()">
     <v-row justify="center" align="center">
       <v-col md="3">
         <v-card min-width="500" outlined>

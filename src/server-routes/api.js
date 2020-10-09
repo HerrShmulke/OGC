@@ -5,7 +5,7 @@
  */
 
 const router = require('express').Router();
-const authentication = require('../models/authentication');
+const authentication = require('../server-models/authentication');
 
 router.post('/login', authentication.login);
 router.post('/verification', authentication.verification);

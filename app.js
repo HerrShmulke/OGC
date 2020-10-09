@@ -29,8 +29,8 @@ if (cluster.isMaster) {
 } else {
   const app = express();
 
-  const pageNotFound = require('./src/controllers/404');
-  const api = require('./src/controllers/api');
+  const pageNotFound = require('./src/server-routes/404');
+  const api = require('./src/server-routes/api');
 
   app.use(compression());
   app.use(cookieParser());

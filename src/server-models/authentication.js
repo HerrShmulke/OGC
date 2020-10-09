@@ -6,8 +6,8 @@
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-const errors = require('../modules/error-codes');
-const db = require('../modules/db');
+const errors = require('../server-modules/error-codes');
+const db = require('../server-modules/db');
 
 /**
  * Возвращает результат прохождения каптчи
@@ -42,7 +42,7 @@ module.exports.login = async (req, res) => {
   try {
     if (mail && pass && reToken) {
       if (await recaptchaValidate(reToken)) {
-        let dbUser = await db.execute('SELECT `password` FROM `users` WHERE `email`=?', [mail]);
+        let dbUser = await db.execute('SELECT `password` FROM `users` WHERE `login`=?', [mail]);
 
         if (dbUser && dbUser.length > 0 && (await argon2.verify(dbUser[0].password, pass))) {
           const payload = { mail, agent: req.header('User-Agent') || req.header('User-agent') };

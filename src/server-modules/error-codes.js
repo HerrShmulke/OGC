@@ -18,4 +18,9 @@ module.exports = {
     code: 3,
     message: 'Ошибка recaptcha',
   },
+
+  limitFileSize: {
+    code: 4,
+    message: 'Превышен максимальный размер файла',
+  },
 };

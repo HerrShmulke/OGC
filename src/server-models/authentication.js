@@ -42,19 +42,19 @@ module.exports.login = async (req, res) => {
   try {
     if (mail && pass && reToken) {
       if (await recaptchaValidate(reToken)) {
-        let dbUser = await db.execute('SELECT `password` FROM `users` WHERE `login`=?', [mail]);
+        let dbUser = await db.execute('SELECT `id`, `password` FROM `users` WHERE `login`=?', [mail]);
 
         if (dbUser && dbUser.length > 0 && (await argon2.verify(dbUser[0].password, pass))) {
-          const payload = { mail, agent: req.header('User-Agent') || req.header('User-agent') };
+          const payload = { id: dbUser[0].id, mail, agent: req.header('User-Agent') || req.header('User-agent') };
 
           const jwtOptions = {
-            expiresIn: remember === 'true' ? '30d' : '1h',
+            expiresIn: remember ? '30d' : '1h',
             algorithm: 'HS256',
           };
 
           const token = jwt.sign(payload, process.env.SECRET_KEY, jwtOptions);
 
-          res.cookie('token', token, { domain: process.env.HOST });
+          res.cookie('token', token, { domain: process.env.HOST, maxAge: remember ? 0x9a7ec800 : 0x36ee80 });
           res.send({ response: { allowed: true } });
         } else {
           res.send({ error: errors.invalidLoginOrPassword });
@@ -63,11 +63,9 @@ module.exports.login = async (req, res) => {
         res.send({ error: errors.invalidRecaptcha });
       }
     } else {
-      console.log(mail, pass);
       res.send({ error: errors.invalidParams });
     }
-  } catch (err) {
-    console.log(err);
+  } catch (_err) {
     res.send({ error: errors.unkownError });
   }
 };

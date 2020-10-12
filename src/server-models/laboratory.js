@@ -5,6 +5,7 @@
  */
 
 const db = require('../server-modules/db');
+const auth = require('../server-models/authentication');
 
 /**
  * The complete Triforce, or one or more components of the Triforce.
@@ -69,4 +70,15 @@ async function uploadCheck(userId, topicId) {
   return false;
 }
 
-module.exports = { topicCheck, uploadCheck };
+/**
+ * Загружает лабораторную работу на сервер
+ * @type {import('express').RequestHandler}
+ */
+async function topicList(req, res) {
+  /** @type {laboratoryTopic[]} */
+  const topics = await db.query('SELECT * FROM `laboratory_topic` WHERE 1');
+
+  res.send({ response: topics });
+}
+
+module.exports = { topicCheck, uploadCheck, topicList };

@@ -31,6 +31,37 @@ async function recaptchaValidate(reToken) {
 }
 
 /**
+ * Проверяет токен и возвращает true, если он подтвержден
+ *
+ * @param {string} token
+ */
+async function verificationToken(token, userAgent) {
+  try {
+    const signedToken = await jwt.verify(token, process.env.SECRET_KEY);
+
+    return signedToken && signedToken.agent === userAgent;
+  } catch {
+    return false;
+  }
+}
+
+async function getVerificationToken(token, userAgent) {
+  try {
+    const signedToken = await jwt.verify(token, process.env.SECRET_KEY);
+
+    if (signedToken && signedToken.agent === userAgent) {
+      return signedToken;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Аутентификация пользователя
+ *
  * @type {import('express').RequestHandler}
  */
 module.exports.login = async (req, res) => {
@@ -71,19 +102,66 @@ module.exports.login = async (req, res) => {
 };
 
 /**
+ * Проверяет, валиден ли токен
+ *
  * @type {import('express').RequestHandler}
  */
 module.exports.verification = async (req, res) => {
-  try {
-    const token = await jwt.verify(req.cookies.token, process.env.SECRET_KEY);
-    const userAgent = req.header('User-Agent') || req.header('User-agent');
+  const token = req.cookies.token || '';
+  const userAgent = req.header('User-Agent') || req.header('User-agent');
 
-    if (token && token.agent === userAgent) {
-      res.send({ response: { success: true } });
-    } else {
-      res.send({ response: { success: false } });
+  res.send({ response: { success: verificationToken(token, userAgent) } });
+};
+
+/**
+ * Проверяет права доступа к странице
+ *
+ * @param {string | string[]} roleList
+ * @return {import('express').RequestHandler};
+ */
+module.exports.access = (roleList) => {
+  /**
+   * @type {import('express').RequestHandler}
+   */
+  return async function(req, res, next) {
+    function sendStatus() {
+      res.status(404);
+      res.send();
     }
-  } catch {
-    res.send({ response: { success: false } });
-  }
+
+    if (!req.cookies.token) {
+      sendStatus();
+      return;
+    }
+
+    const signedToken = await getVerificationToken(
+      req.cookies.token,
+      req.header('User-Agent') || req.header('User-agent'),
+    );
+
+    if (signedToken) {
+      const user = (await db.execute('SELECT `role` FROM `users` WHERE `id`=?', signedToken.id))[0];
+
+      if (typeof roleList === 'string' && user.role === roleList) {
+        next();
+        return;
+      } else if (typeof roleList === 'object') {
+        for (let i = 0; i < roleList.length; ++i) {
+          if (roleList[i] === user.role) {
+            next();
+            return;
+          }
+        }
+
+        sendStatus();
+        return;
+      }
+
+      sendStatus();
+      return;
+    }
+
+    sendStatus();
+    return;
+  };
 };

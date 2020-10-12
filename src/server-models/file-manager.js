@@ -48,6 +48,11 @@ const upload = multer({
  */
 module.exports.uploadLabWork = (req, res) => {
   upload.single('file')(req, res, async (err) => {
+    if (!req.file) {
+      res.send({ error: errors.invalidParams });
+      return;
+    }
+
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         res.send({ error: errors.limitFileSize });

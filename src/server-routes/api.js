@@ -11,7 +11,8 @@ const laboratory = require('../server-models/laboratory');
 
 router.post('/login', authentication.login);
 router.post('/verification', authentication.verification);
-router.post('/labs/upload', fileManager.uploadLabWork);
+router.post('/labs/upload', authentication.access('student'), fileManager.uploadLabWork);
+router.post('/labs/list', authentication.access('student'), laboratory.topicList);
 router.get('/labs/current', async (req, res) => {
   res.send(await laboratory.uploadCheck(1, 1));
 });

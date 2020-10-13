@@ -71,12 +71,22 @@ async function uploadCheck(userId, topicId) {
 }
 
 /**
- * Загружает лабораторную работу на сервер
+ * Выводит список лабораторных работ
  * @type {import('express').RequestHandler}
  */
 async function topicList(req, res) {
-  /** @type {laboratoryTopic[]} */
-  const topics = await db.query('SELECT * FROM `laboratory_topic` WHERE 1');
+  const sql =
+    'SELECT laboratory_topic.id FROM laboratory_topic INNER JOIN laboratory_works ON laboratory_works.topic_id=laboratory_topic.id AND laboratory_works.owner_id=?';
+  // Список сданных работ студентом
+  const waitingPerformedWorks = db.execute(sql, [req.access.id]);
+  const waitingLaboratoryTopics = db.query('SELECT * FROM `laboratory_topic` WHERE 1');
+
+  const waitingResult = await Promise.all([waitingLaboratoryTopics, waitingPerformedWorks]);
+
+  const topics = waitingResult[0].map((e) => {
+    e.workDone = waitingResult[1].find((item) => e.id === item.id) !== undefined;
+    return e;
+  });
 
   res.send({ response: topics });
 }

@@ -1,10 +1,21 @@
 <template>
   <div>
-    <v-navigation-drawer mini-variant app>
+    <v-bottom-navigation v-if="$vuetify.breakpoint.mobile" app color="primary">
+      <v-btn to="/school">
+        <span>Обучение</span>
+        <v-icon>mdi-school-outline</v-icon>
+      </v-btn>
+
+      <v-btn to="/reviews">
+        <span>Рецензии</span>
+        <v-icon>mdi-file-outline</v-icon>
+      </v-btn>
+    </v-bottom-navigation>
+    <v-navigation-drawer mini-variant app v-else>
       <v-list dense>
         <MenuItem to="/school" icon="mdi-school-outline" name="Обучение" />
         <MenuItem to="/reviews" icon="mdi-file-outline" name="Рецензии" />
-        <v-divider /> 
+        <v-divider />
         <v-list-item>
           <v-icon @click="changeTheme()">
             mdi-theme-light-dark
@@ -32,5 +43,7 @@
         localStorage.setItem('theme', this.$vuetify.theme.dark);
       },
     },
+
+    mounted() {},
   };
 </script>

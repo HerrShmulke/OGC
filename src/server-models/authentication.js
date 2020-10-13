@@ -85,7 +85,7 @@ module.exports.login = async (req, res) => {
 
           const token = jwt.sign(payload, process.env.SECRET_KEY, jwtOptions);
 
-          res.cookie('token', token, { domain: process.env.HOST, maxAge: remember ? 0x9a7ec800 : 0x36ee80 });
+          res.cookie('token', token, { maxAge: remember ? 0x9a7ec800 : 0x36ee80 });
           res.send({ response: { allowed: true } });
         } else {
           res.send({ error: errors.invalidLoginOrPassword });
@@ -110,7 +110,7 @@ module.exports.verification = async (req, res) => {
   const token = req.cookies.token || '';
   const userAgent = req.header('User-Agent') || req.header('User-agent');
 
-  res.send({ response: { success: verificationToken(token, userAgent) } });
+  res.send({ response: { success: await verificationToken(token, userAgent) } });
 };
 
 /**
@@ -143,11 +143,15 @@ module.exports.access = (roleList) => {
       const user = (await db.execute('SELECT `role` FROM `users` WHERE `id`=?', signedToken.id))[0];
 
       if (typeof roleList === 'string' && user.role === roleList) {
+        req.access = {};
+        req.access.id = signedToken.id;
         next();
         return;
       } else if (typeof roleList === 'object') {
         for (let i = 0; i < roleList.length; ++i) {
           if (roleList[i] === user.role) {
+            req.access = {};
+            req.access.id = signedToken.id;
             next();
             return;
           }

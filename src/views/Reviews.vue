@@ -69,7 +69,7 @@
             <v-tabs-items v-model="tab">
               <v-tab-item>
                 <v-data-table :headers="reviewHeaders" :items="listOfReviews">
-                  <template #item.actions="{ item }">
+                  <template v-slot:[`item.actions`]="{ item }">
                     <v-icon @click="download(item)" class="mr-2">
                       mdi-cloud-download-outline
                     </v-icon>

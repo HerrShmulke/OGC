@@ -11,6 +11,5 @@ DB_BASE= # Название базы данных
 SECRET_KEY= # Секретный ключ для JWT
 VUE_APP_PUBLIC_KEY= # Публичный ключ ReCaptcha
 RECAPTCHA_SECRET= # Секретный ключ ReCaptcha
-HOST= # Адрес сайта
 NODE_ENV=development
 ```
